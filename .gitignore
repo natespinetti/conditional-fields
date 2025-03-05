@@ -9,7 +9,7 @@
 /coverage
 
 # production
-/build
+# /build
 
 # dotenv environment variables file
 .env
