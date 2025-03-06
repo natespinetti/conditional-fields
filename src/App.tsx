@@ -8,6 +8,7 @@ import Sidebar from './locations/Sidebar';
 import Page from './locations/Page';
 import Home from './locations/Home';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import Redirect from 'components/Redirect';
 
 const ComponentLocationSettings = {
   [locations.LOCATION_APP_CONFIG]: ConfigScreen,
@@ -17,6 +18,7 @@ const ComponentLocationSettings = {
   [locations.LOCATION_ENTRY_SIDEBAR]: Sidebar,
   [locations.LOCATION_PAGE]: Page,
   [locations.LOCATION_HOME]: Home,
+  "/conditional-fields": Redirect, // ✅ Handle redirect path
 };
 
 const App = () => {
