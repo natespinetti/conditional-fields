@@ -5,8 +5,6 @@ import { Field } from '@contentful/default-field-editors';
 
 const Fields = (fields: any) => {
   const sdk = useSDK<FieldAppSDK>();
-  console.log(sdk);
-  console.log(fields.fields.getForLocale(sdk.locales.default));
   const extendedField = fields.fields.getForLocale(sdk.locales.default);
   const fieldDetails = sdk.contentType.fields.find(({ id }) => id === extendedField.id);
   const fieldEditorInterface = sdk.editor.editorInterface?.controls?.find(

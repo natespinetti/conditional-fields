@@ -15,8 +15,6 @@ const Selector = (fields: any) => {
             contentField.setValue([value]);
         }
     }, [value, contentField]); 
-
-    console.log(fields);
     
     return (
         <>
