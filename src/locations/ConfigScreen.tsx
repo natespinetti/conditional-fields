@@ -9,7 +9,7 @@ import ViewRules from "components/ViewRules";
 export interface AppInstallationParameters {
   rules?: {
     component: string;
-    isEqualTo: boolean;
+    isEqualTo: string;
     ifField: string;
     condition: string;
     affectedFields: { field: string; action: "show" }[];
@@ -17,18 +17,20 @@ export interface AppInstallationParameters {
   excludedComponents?: string[];
 }
 
+export type condition  = "equal" | "not equal" | "contains" | "not contains" | "empty" | "not empty" | string;
+
 export default function ConfigurationScreen() {
   const sdk = useSDK<ConfigAppSDK>();
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
   const [components, setComponents] = useState<any[]>([]);
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
-  const [fields, setFields] = useState<string[]>([]);
+  const [fields, setFields] = useState<any[]>([]);
   const [excludedComponents, setExcludedComponents] = useState<string[]>([]);
   const [rules, setRules] = useState<
-    { component: string; ifField: string; isEqualTo: boolean; condition: string; affectedFields: { field: string; action: "show" }[] }[]
+    { component: string; ifField: string; isEqualTo: condition; condition: string; affectedFields: { field: string; action: "show" }[] }[]
   >([]);
   const [currentRule, setCurrentRule] = useState<
-    { component: string; ifField: string; isEqualTo: boolean; condition: string; affectedFields: { field: string; action: "show" }[] }
+    { component: string; ifField: string; isEqualTo: condition; condition: string; affectedFields: { field: string; action: "show" }[] }
   >();
   const [whichComponent, setWhichComponent] = useState('all');
   const [isShown, setShown] = useState(false);
@@ -61,10 +63,11 @@ export default function ConfigurationScreen() {
     async function fetchContentTypes() {
       sdk.cma.contentType
       .getMany({ query: { limit: 1000 } })
-      .then((response) =>
+      .then((response) =>{
         setComponents(
           response.items.map((ct) => ({ id: ct.sys.id, name: ct.name }))
         )
+        console.log(response.items)}
       )
       .catch(console.error);
     }
@@ -77,8 +80,10 @@ export default function ConfigurationScreen() {
       if (!selectedComponent) return;
       sdk.cma.contentType
       .get({ contentTypeId: selectedComponent })
-      .then((response) =>
-        setFields(Object.values(response.fields.map((f) => f.id)))
+      .then((response) =>{
+        setFields(Object.values(response.fields.map((f) => ({id: f.id, name: f.name, type: f.type}))));
+      console.log(response.fields);
+      }
       )
       .catch(console.error);
     }
@@ -118,11 +123,11 @@ export default function ConfigurationScreen() {
         const sysVersion = editorInterface.sys.version; // Ensure correct version
   
         // **Ensure entry editor is first**
-        const existingEditors = editorInterface.editors || [];
-        const updatedEditors = [
-          { widgetId: appId, widgetNamespace: "app" }, // Your app first
-          ...existingEditors.filter((editor) => editor.widgetId !== appId), // Keep others
-        ];
+        // const existingEditors = editorInterface.editors || [];
+        // const updatedEditors = [
+        //   { widgetId: appId, widgetNamespace: "app" }, // Your app first
+        //   ...existingEditors.filter((editor) => editor.widgetId !== appId), // Keep others
+        // ];
 
         // **Ensure sidebar has defaults if undefined**
         const existingSidebar = editorInterface.sidebar !== undefined ? editorInterface.sidebar : DEFAULT_SIDEBAR;
@@ -151,7 +156,7 @@ export default function ConfigurationScreen() {
               updatedAt: editorInterface.sys.updatedAt,
               version: sysVersion,
             },
-            editors: updatedEditors,
+            // editors: updatedEditors,
             sidebar: updatedSidebar, // Now guaranteed to exist
           }
         );
@@ -194,14 +199,14 @@ export default function ConfigurationScreen() {
     setCurrentRule({
       component: "", // Start without a selected component
       ifField: "",
-      isEqualTo: true,
+      isEqualTo: "",
       condition: "",
       affectedFields: [],
     });
   };
   // save rule to rules
   const handleSaveRule = () => {
-    if (currentRule && currentRule.component && currentRule.ifField && currentRule.condition && currentRule.affectedFields.length > 0) {
+    if (currentRule && currentRule.component && currentRule.ifField && currentRule.affectedFields.length > 0) {
       setRules((prev) => [...prev, currentRule]);
       setCurrentRule(undefined);
       setShown(false);
@@ -211,9 +216,7 @@ export default function ConfigurationScreen() {
   };
   
   return (
-    <div style={{ padding: "20px", maxWidth: "800px" }}>
-      <h2 style={{ padding: "1rem 0 2rem"}}>Configure Conditional Fields</h2>
-
+    <div style={{ padding: "20px" }}>
       {/* View, Filter, and Add Rules */}
       <ViewRules 
         components={components} 

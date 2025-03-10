@@ -1,9 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { EditorAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import Field from './Field';
+import Field from 'components/DefaultField';
 import FieldWrap from 'components/FieldWrap';
 import Selector from 'components/Selector';
+import { condition } from './ConfigScreen';
+
+export type Rule = {
+  component: string;
+  ifField: string;
+  isEqualTo: condition;
+  condition: string;
+  affectedFields: { field: string; action: "show" | "hide" }[];
+};
 
 const Entry = () => {
   const sdk = useSDK<EditorAppSDK>();
@@ -12,9 +21,7 @@ const Entry = () => {
   });
   const [hiddenFields, setHiddenFields] = useState<Record<string, any>>({});
   const [fieldOrder, setFieldOrder] = useState<string[]>(Object.keys(sdk.entry.fields));
-  const [rules, setRules] = useState<
-    { component: string; ifField: string; isEqualTo: Boolean; condition: string; affectedFields: { field: string; action: "show" | "hide" }[] }[]
-  >([]);
+  const [rules, setRules] = useState<Rule[]>([]);
 
   useEffect(() => {
     const entryFields = sdk.entry.fields;
@@ -31,37 +38,47 @@ const Entry = () => {
   const detachFunctions = useRef<(() => void)[]>([]);
 
   useEffect(() => {
-    // Clear previous listeners
     detachFunctions.current.forEach((detach) => detach());
     detachFunctions.current = [];
   
-    // watch the "If" field for changes
+    const evaluateCondition = (rule: Rule, fieldValue: string): boolean => {
+      switch (rule.isEqualTo) {
+        case "equal":
+          return fieldValue === rule.condition;
+        case "not equal":
+          return fieldValue !== rule.condition;
+        case "contains":
+          return fieldValue.includes(rule.condition);
+        case "not contains":
+          return !fieldValue.includes(rule.condition);
+        case "empty":
+          return fieldValue === "" || fieldValue === undefined || fieldValue === null;
+        case "not empty":
+          return fieldValue !== "" && fieldValue !== undefined && fieldValue !== null;
+        default:
+          // If the condition is a string, treat it like "equal"
+          return fieldValue === rule.isEqualTo;
+      }
+    };
+  
     rules.forEach((rule) => {
       const watchField = sdk.entry.fields[rule.ifField];
-  
       if (!watchField) return;
   
       const detach = watchField.onValueChanged((value) => {
         const val = value?.toString() || "";
   
-        // check condition
-        const shouldApplyRule = Array.isArray(rule.condition)
-          ? rule.condition.includes(val)
-          : rule.condition === val;
+        const shouldApplyRule = evaluateCondition(rule, val);
+        const shouldShow = shouldApplyRule;
+        console.log(shouldShow);
   
-        // equal or not equal to
-        const shouldShow = rule.isEqualTo ? shouldApplyRule : !shouldApplyRule;
-    
-        // apply rule and rerender fields
         setFields((prevFields) => {
           let newFields = { ...prevFields };
   
-          // show/hide affected fields
           rule.affectedFields.forEach((field) => {
             if (field.action === "show") {
               if (shouldShow) {
-                // Restore field when condition is met
-                if (hiddenFields[field.field]) {  
+                if (hiddenFields[field.field]) {
                   newFields[field.field] = hiddenFields[field.field];
   
                   setHiddenFields((prevHidden) => {
@@ -70,18 +87,15 @@ const Entry = () => {
                     return newHidden;
                   });
   
-                  // Maintain original field order
                   setFieldOrder((prevOrder) => {
                     if (!prevOrder.includes(field.field)) {
                       const originalOrder = [...prevOrder, field.field].filter((f, i, arr) => arr.indexOf(f) === i);
-                      console.log("🚀 Updated Field Order:", originalOrder);
                       return originalOrder;
                     }
                     return prevOrder;
                   });
                 }
               } else {
-                // Hide field when condition is NOT met  
                 if (!hiddenFields[field.field]) {
                   setHiddenFields((prevHidden) => ({
                     ...prevHidden,
@@ -89,17 +103,18 @@ const Entry = () => {
                   }));
                 }
   
-                delete newFields[field.field]; // Remove field from visible fields
+                delete newFields[field.field];
   
-                // Keep field order so it can be restored in the right place
-                setFieldOrder((prevOrder) => prevOrder.includes(field.field) ? prevOrder : [...prevOrder, field.field]);
+                setFieldOrder((prevOrder) =>
+                  prevOrder.includes(field.field) ? prevOrder : [...prevOrder, field.field]
+                );
               }
             }
           });
   
           return Object.fromEntries(
             fieldOrder
-              .filter((f) => newFields[f]) // Ensure only visible fields are kept in order
+              .filter((f) => newFields[f])
               .map((f) => [f, newFields[f]])
           );
         });

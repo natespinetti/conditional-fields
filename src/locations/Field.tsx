@@ -1,53 +1,125 @@
-import React from 'react';
-import { FieldAppSDK } from '@contentful/app-sdk';
+import React, { useEffect, useState } from 'react';
+import { EntryFieldAPI, FieldAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { Field } from '@contentful/default-field-editors';
+import DefaultField from 'components/DefaultField';
 import { Note } from '@contentful/f36-components';
 import { EditIcon } from '@contentful/f36-icons';
+import { condition } from './ConfigScreen';
+import { Rule } from './EntryEditor';
 
-const Fields = (fields: any) => {
+const Fields = () => {
   const sdk = useSDK<FieldAppSDK>();
-  const extendedField = fields.fields.getForLocale(sdk.locales.default);
-  const fieldDetails = sdk.contentType.fields.find(({ id }) => id === extendedField.id);
-  const fieldEditorInterface = sdk.editor.editorInterface?.controls?.find(
-    ({ fieldId }) => fieldId === extendedField.id
-  );
-  const widgetNamespace = sdk.editor.editorInterface?.controls?.find(
-    ({ fieldId }) => fieldId === extendedField.id
-  )?.widgetNamespace;
-  const locales = sdk.locales;
+
+  const [rules, setRules] = useState<
+    {
+      component: string;
+      ifField: string;
+      isEqualTo: condition;
+      condition: string;
+      affectedFields: { field: string; action: 'show' | 'hide' }[];
+    }[]
+  >([]);
+
+  const [showIframe, setShowIframe] = useState(true);
+  const [currentField, setCurrentField] = useState<EntryFieldAPI>();
+
+  useEffect(() => {
+      const entryFields = sdk.entry.fields;
+      console.log(Object.values(entryFields).find((field) => field.id === sdk.field.id));
+      setCurrentField(Object.values(entryFields).find((field) => field.id === sdk.field.id));
+      console.log(sdk);
+    }, [sdk]);
+
+  useEffect(() => {
+    if (sdk.parameters.installation.rules) {
+      setRules(sdk.parameters.installation.rules);
+    }
+  }, [sdk]);
   
-  const fieldSdk: FieldAppSDK = {
-    ...sdk,
-    field: extendedField,
-    locales,
-    parameters: {
-      ...sdk.parameters,
-      instance: {
-        ...sdk.parameters.instance,
-        ...fieldEditorInterface?.settings,
-      },
-    },
-  } as any;
-
-  if (!sdk) {
-    return <p>Loading...</p>;
-  }
-  if (!fieldDetails || !fieldEditorInterface) {
-    return null;
-  }
-
-    return (
-      <>
-        <Field sdk={fieldSdk} />
-        {widgetNamespace !== "builtin" && (
-          <Note variant="warning" icon={<EditIcon />} style={{ marginTop: "10px" }}>
-            This field can't be rendered in the conditional fields layout. Please use the Default Editor to access the custom field properly.
-          </Note>
-      )}
-      </>
+  useEffect(() => {
+    const matchingRule = rules.find(rule =>
+      rule.affectedFields.some(f => f.field === sdk.field.id)
     );
+  
+    console.log("Matching Rule:", matchingRule);
+  
+    if (!matchingRule) {
+      // No rules target this field → show it.
+      setShowIframe(true);
+      return;
+    }
+  
+    const watchField = sdk.entry.fields[matchingRule.ifField];
+    console.log("Watch Field:", watchField);
+  
+    if (!watchField) return;
+  
+    // Move the condition evaluator into here
+    const evaluateCondition = (rule: Rule, fieldValue: string): boolean => {
+      switch (rule.isEqualTo) {
+        case "equal":
+          return fieldValue === rule.condition;
+        case "not equal":
+          return fieldValue !== rule.condition;
+        case "contains":
+          return fieldValue.includes(rule.condition);
+        case "not contains":
+          return !fieldValue.includes(rule.condition);
+        case "empty":
+          return fieldValue === "" || fieldValue === undefined || fieldValue === null;
+        case "not empty":
+          return fieldValue !== "" && fieldValue !== undefined && fieldValue !== null;
+        default:
+          // Fallback for custom string match
+          return fieldValue === rule.isEqualTo;
+      }
+    };
+  
+    // Setup listener
+    const detach = watchField.onValueChanged(value => {
+      const val = value?.toString() || '';
+  
+      const shouldApplyRule = evaluateCondition(matchingRule, val);
+      const shouldShow = shouldApplyRule;
+  
+      console.log("Should Show:", shouldShow);
+  
+      const affectedField = matchingRule.affectedFields.find(f => f.field === sdk.field.id);
+  
+      if (affectedField) {
+        if (affectedField.action === 'show') {
+          setShowIframe(shouldShow);
+        } else if (affectedField.action === 'hide') {
+          setShowIframe(!shouldShow);
+  
+          // Optional: If you need to physically hide the iframe element
+          const iframe = window.parent.document.querySelector('iframe');
+          if (iframe) {
+            iframe.style.display = !shouldShow ? "none" : "block";
+          }
+        }
+      }
+    });
+  
+    // Cleanup listener on unmount or dependency change
+    return () => {
+      detach();
+    };
+  
+  }, [rules, sdk]);
+  
+
+  return (
+    <>
+      {showIframe && currentField ? (
+        <DefaultField fields={currentField} isSingle={true} />
+      ) : (
+        <Note variant="warning" icon={<EditIcon />} style={{ marginTop: "10px" }}>
+            This field is being hidden by a conditional rule.
+        </Note>
+      )}
+    </>
+  );
 };
 
 export default Fields;
-

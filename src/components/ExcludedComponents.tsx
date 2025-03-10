@@ -11,7 +11,7 @@ interface ExcludedComponentsProps {
     
     return (
         <>
-        <Stack style={{ width: "80vw", borderRadius: "12px", boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)", padding: "20px", border: "1px solid #ddd", marginBottom: "20px" }}>
+        <Stack style={{ borderRadius: "12px", boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)", padding: "20px", border: "1px solid #ddd", marginBottom: "20px" }}>
             <label>Select components to exclude:</label>
             {components.map((comp: { id: React.Key | null | undefined; name: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; }) => (
                 <Checkbox

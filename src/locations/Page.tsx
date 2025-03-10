@@ -7,7 +7,6 @@ const Page = () => {
   const sdk = useSDK<PageAppSDK>();
 
   useEffect(() => {
-    // Redirect to the app's configuration screen
     sdk.navigator.openAppConfig();
   }, [sdk]);
 

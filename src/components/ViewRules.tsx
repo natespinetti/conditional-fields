@@ -18,7 +18,7 @@ interface ViewRulesProps {
     
     return (
         <>
-        <Stack flexDirection="column" alignItems="start" style={{ width: "80vw", borderRadius: "12px", boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)", padding: "20px", border: "1px solid #ddd", marginBottom: "20px" }}>
+        <Stack flexDirection="column" alignItems="start" style={{ borderRadius: "12px", boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)", padding: "20px", border: "1px solid #ddd", marginBottom: "20px" }}>
             <Stack style={{display: "grid", gridTemplateColumns: "auto auto", gap: "2rem", justifyContent: "space-between", width: "100%", alignItems: "start"}}>
                 <Stack flexDirection="row" style={{ flexWrap: "wrap"}}>
                     <label>View rules for:</label>      
@@ -65,7 +65,7 @@ interface ViewRulesProps {
                     <Stack flexDirection="row" style={{ width: "100%", justifyContent: "space-between", alignItems: "center" }}>
                         <div style={{ borderLeft: "2px solid black", paddingLeft: "1rem" }} key={index}>
                         <div style={{ fontWeight: 700, fontSize: "16px", paddingBottom: ".5rem"}}>Rule for {rule.component} component</div>
-                        <Paragraph style={{ marginBottom:".25rem" }}>If <strong>{rule.ifField}</strong> <strong>{rule.isEqualTo ? "is equal to" : "is not equal to"}</strong> <strong>{rule.condition}</strong>, {rule.affectedFields.map((details: any, idx: any) => {
+                        <Paragraph style={{ marginBottom:".25rem" }}>If <strong>{rule.ifField}</strong> is <strong>{rule.isEqualTo}</strong>{rule.condition && " to "}<strong>{rule.condition}</strong>, {rule.affectedFields.map((details: any, idx: any) => {
                             const total = rule.affectedFields.length;
                             const separator = idx === total - 2 ? " and " : idx < total - 2 ? ", " : ""; // Adds correct separator
 
