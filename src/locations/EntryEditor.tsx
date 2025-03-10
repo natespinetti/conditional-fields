@@ -19,7 +19,7 @@ const Entry = () => {
   useEffect(() => {
     const entryFields = sdk.entry.fields;
     setFields(entryFields);
-
+    console.log(sdk);
   }, [sdk]);
 
   useEffect(() => {

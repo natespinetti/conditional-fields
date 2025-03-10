@@ -85,13 +85,91 @@ export default function ConfigurationScreen() {
     fetchFields();
   }, [selectedComponent, sdk]);
 
-    const onConfigure = useCallback(async () => {
-      const currentState = await sdk.app.getCurrentState();
-      return {
-        parameters,
-        targetState: currentState,
-      };
-    }, [parameters, sdk]);
+  const DEFAULT_SIDEBAR = [
+    { widgetId: "publication-widget", widgetNamespace: "sidebar-builtin" },
+    { widgetId: "content-preview-widget", widgetNamespace: "sidebar-builtin" },
+    { widgetId: "incoming-links-widget", widgetNamespace: "sidebar-builtin" },
+    { widgetId: "translation-widget", widgetNamespace: "sidebar-builtin" },
+    { widgetId: "versions-widget", widgetNamespace: "sidebar-builtin" },
+  ];
+  
+  const onConfigure = useCallback(async () => {
+    const currentState = await sdk.app.getCurrentState();
+    const { space, environment } = sdk.ids;
+    const appId = sdk.ids.app;
+  
+    try {
+      // Fetch all content types
+      const contentTypes = await sdk.cma.contentType.getMany({
+        spaceId: space,
+        environmentId: environment,
+      });
+  
+      for (const contentType of contentTypes.items) {
+        const contentTypeId = contentType.sys.id;
+  
+        // Fetch current editor interface
+        const editorInterface = await sdk.cma.editorInterface.get({
+          spaceId: space,
+          environmentId: environment,
+          contentTypeId,
+        });
+  
+        const sysVersion = editorInterface.sys.version; // Ensure correct version
+  
+        // **Ensure entry editor is first**
+        const existingEditors = editorInterface.editors || [];
+        const updatedEditors = [
+          { widgetId: appId, widgetNamespace: "app" }, // Your app first
+          ...existingEditors.filter((editor) => editor.widgetId !== appId), // Keep others
+        ];
+
+        // **Ensure sidebar has defaults if undefined**
+        const existingSidebar = editorInterface.sidebar !== undefined ? editorInterface.sidebar : DEFAULT_SIDEBAR;
+  
+        // **Ensure your app is added at the end**
+        const updatedSidebar = [
+          ...existingSidebar.filter((item) => item.widgetId !== appId), // Keep existing
+          { widgetId: appId, widgetNamespace: "app" }, // Append your app last
+        ];
+  
+        // **Explicitly update with latest `sys.version`**
+        await sdk.cma.editorInterface.update(
+          {
+            spaceId: space,
+            environmentId: environment,
+            contentTypeId,
+          },
+          {
+            sys: {
+              id: editorInterface.sys.id,
+              type: editorInterface.sys.type,
+              space: editorInterface.sys.space,
+              environment: editorInterface.sys.environment,
+              contentType: editorInterface.sys.contentType,
+              createdAt: editorInterface.sys.createdAt,
+              updatedAt: editorInterface.sys.updatedAt,
+              version: sysVersion,
+            },
+            editors: updatedEditors,
+            sidebar: updatedSidebar, // Now guaranteed to exist
+          }
+        );
+      }
+  
+      sdk.notifier.success("Entry editor set as first and sidebar updated successfully.");
+    } catch (error) {
+      console.error("Error updating editor interface:", error);
+      sdk.notifier.error("Failed to update entry editor and sidebar.");
+    }
+  
+    return {
+      parameters,
+      targetState: currentState,
+    };
+  }, [parameters, sdk]);
+  
+  
   
     useEffect(() => {
       sdk.app.onConfigure(() => onConfigure());
@@ -121,7 +199,6 @@ export default function ConfigurationScreen() {
       affectedFields: [],
     });
   };
-  
   // save rule to rules
   const handleSaveRule = () => {
     if (currentRule && currentRule.component && currentRule.ifField && currentRule.condition && currentRule.affectedFields.length > 0) {

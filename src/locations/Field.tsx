@@ -2,6 +2,8 @@ import React from 'react';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { Field } from '@contentful/default-field-editors';
+import { Note } from '@contentful/f36-components';
+import { EditIcon } from '@contentful/f36-icons';
 
 const Fields = (fields: any) => {
   const sdk = useSDK<FieldAppSDK>();
@@ -10,9 +12,9 @@ const Fields = (fields: any) => {
   const fieldEditorInterface = sdk.editor.editorInterface?.controls?.find(
     ({ fieldId }) => fieldId === extendedField.id
   );
-  const widgetId = sdk.editor.editorInterface?.controls?.find(
+  const widgetNamespace = sdk.editor.editorInterface?.controls?.find(
     ({ fieldId }) => fieldId === extendedField.id
-  )?.widgetId;
+  )?.widgetNamespace;
   const locales = sdk.locales;
   
   const fieldSdk: FieldAppSDK = {
@@ -36,7 +38,14 @@ const Fields = (fields: any) => {
   }
 
     return (
-        <Field sdk={fieldSdk} widgetId={widgetId} />
+      <>
+        <Field sdk={fieldSdk} />
+        {widgetNamespace !== "builtin" && (
+          <Note variant="warning" icon={<EditIcon />} style={{ marginTop: "10px" }}>
+            This field can't be rendered in the conditional fields layout. Please use the Default Editor to access the custom field properly.
+          </Note>
+      )}
+      </>
     );
 };
 
