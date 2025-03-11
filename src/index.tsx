@@ -4,6 +4,7 @@ import { SDKProvider } from '@contentful/react-apps-toolkit';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import LocalhostWarning from './components/LocalhostWarning';
+import React from 'react';
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);

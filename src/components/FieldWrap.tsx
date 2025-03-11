@@ -2,11 +2,7 @@ import React from 'react';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { FieldWrapper } from '@contentful/default-field-editors';
-
-type FieldWrapProps = {
-  fields: any;
-  children?: React.ReactNode;
-};
+import { FieldWrapProps } from 'types';
 
 const FieldWrap: React.FC<FieldWrapProps> = ({ fields, children }) => {
   const sdk = useSDK<FieldAppSDK>();

@@ -4,22 +4,11 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import DefaultField from 'components/DefaultField';
 import { Note } from '@contentful/f36-components';
 import { EditIcon } from '@contentful/f36-icons';
-import { condition } from './ConfigScreen';
-import { Rule } from './EntryEditor';
+import { Rule } from 'types';
 
 const Fields = () => {
   const sdk = useSDK<FieldAppSDK>();
-
-  const [rules, setRules] = useState<
-    {
-      component: string;
-      ifField: string;
-      isEqualTo: condition;
-      condition: string;
-      affectedFields: { field: string; action: 'show' | 'hide' }[];
-    }[]
-  >([]);
-
+  const [rules, setRules] = useState<Rule[]>([]);
   const [showIframe, setShowIframe] = useState(true);
   const [currentField, setCurrentField] = useState<EntryFieldAPI>();
 

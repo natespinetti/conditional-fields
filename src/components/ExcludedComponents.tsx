@@ -1,13 +1,8 @@
 import { Checkbox, Stack } from "@contentful/f36-components";
 import React from "react";
-
-interface ExcludedComponentsProps {
-    components: any[];
-    excludedComponents: string[];
-    setExcludedComponents: (arg0: (prev: any) => any) => void;
-  }
+import { ExcludedComponentsProps } from "types";
   
-  const ExcludedComponents: React.FC<ExcludedComponentsProps> = ({ components, excludedComponents, setExcludedComponents }) => {
+const ExcludedComponents: React.FC<ExcludedComponentsProps> = ({ components, excludedComponents, setExcludedComponents }) => {
     
     return (
         <>
@@ -18,12 +13,12 @@ interface ExcludedComponentsProps {
                     key={comp.id}
                     value={String(comp.id)}
                     id={String(comp.id)}
-                    isChecked={excludedComponents.includes(String(comp.id))} // ✅ Control checked state
+                    isChecked={excludedComponents.includes(String(comp.id))} // Control checked state
                     onChange={(e) => {
                         setExcludedComponents((prev: any[]) =>
                         e.target.checked
-                            ? [...prev, comp.id] // ✅ Add if checked
-                            : prev.filter((id: any) => id !== comp.id) // ✅ Remove if unchecked
+                            ? [...prev, comp.id] // Add if checked
+                            : prev.filter((id: any) => id !== comp.id) // Remove if unchecked
                         );
                     }}
                 >

@@ -2,7 +2,7 @@ import React from 'react';
 import { Paragraph } from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-import { condition } from './ConfigScreen';
+import { Condition } from 'types';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
@@ -13,7 +13,7 @@ const Sidebar = () => {
       
       {sdk.parameters.installation.rules
         .filter((rule: { component: string }) => sdk.contentType.sys.id === rule.component) // ✅ Ensure component matches content type ID
-        .map((rule: { ifField: string; condition: string; affectedFields: any[]; isEqualTo: condition }, index: number) => (
+        .map((rule: { ifField: string; condition: string; affectedFields: any[]; isEqualTo: Condition }, index: number) => (
           <div style={{ borderLeft: "2px solid black", paddingLeft: "10px", marginBottom: "10px" }} key={index}>
           <Paragraph style={{ marginBottom:".25rem" }}>If <strong>{rule.ifField}</strong> is <strong>{rule.isEqualTo}</strong>{rule.condition && " to "}<strong>{rule.condition}</strong>, {rule.affectedFields.map((details: any, idx: any) => {
               const total = rule.affectedFields.length;

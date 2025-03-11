@@ -4,15 +4,7 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import Field from 'components/DefaultField';
 import FieldWrap from 'components/FieldWrap';
 import Selector from 'components/Selector';
-import { condition } from './ConfigScreen';
-
-export type Rule = {
-  component: string;
-  ifField: string;
-  isEqualTo: condition;
-  condition: string;
-  affectedFields: { field: string; action: "show" | "hide" }[];
-};
+import { Rule } from 'types';
 
 const Entry = () => {
   const sdk = useSDK<EditorAppSDK>();

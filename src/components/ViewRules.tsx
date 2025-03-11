@@ -1,20 +1,9 @@
 import { Button, Paragraph, Radio, Stack } from "@contentful/f36-components";
 import React from "react";
 import { CloseIcon, PlusIcon } from '@contentful/f36-icons';
+import { ViewRulesProps } from "types";
 
-
-interface ViewRulesProps {
-    components: any[];
-    excludedComponents: string[];
-    setWhichComponent: (component: string) => void;
-    whichComponent: string;
-    rules: any[];
-    setShown: (shown: boolean) => void;
-    addRule: () => void;
-    setRules: (arg0: (prev: any) => any) => void;
-  }
-  
-  const ViewRules: React.FC<ViewRulesProps> = ({ components, excludedComponents, setWhichComponent, whichComponent, rules, setShown, addRule, setRules }) => {
+const ViewRules: React.FC<ViewRulesProps> = ({ components, excludedComponents, setWhichComponent, whichComponent, rules, setShown, addRule, setRules }) => {
     
     return (
         <>

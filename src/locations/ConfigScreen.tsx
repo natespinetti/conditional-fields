@@ -5,33 +5,17 @@ import React from "react";
 import CreateRule from "components/CreateRule";
 import ExcludedComponents from "components/ExcludedComponents";
 import ViewRules from "components/ViewRules";
-
-export interface AppInstallationParameters {
-  rules?: {
-    component: string;
-    isEqualTo: string;
-    ifField: string;
-    condition: string;
-    affectedFields: { field: string; action: "show" }[];
-  }[];
-  excludedComponents?: string[];
-}
-
-export type condition  = "equal" | "not equal" | "contains" | "not contains" | "empty" | "not empty" | string;
+import { AppInstallationParameters, Component, Fields, Rule } from "types";
 
 export default function ConfigurationScreen() {
   const sdk = useSDK<ConfigAppSDK>();
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
-  const [components, setComponents] = useState<any[]>([]);
+  const [components, setComponents] = useState<Component[]>([]);
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
-  const [fields, setFields] = useState<any[]>([]);
+  const [fields, setFields] = useState<Fields[]>([]);
   const [excludedComponents, setExcludedComponents] = useState<string[]>([]);
-  const [rules, setRules] = useState<
-    { component: string; ifField: string; isEqualTo: condition; condition: string; affectedFields: { field: string; action: "show" }[] }[]
-  >([]);
-  const [currentRule, setCurrentRule] = useState<
-    { component: string; ifField: string; isEqualTo: condition; condition: string; affectedFields: { field: string; action: "show" }[] }
-  >();
+  const [rules, setRules] = useState<Rule[]>([]);
+  const [currentRule, setCurrentRule] = useState<Rule | undefined>();
   const [whichComponent, setWhichComponent] = useState('all');
   const [isShown, setShown] = useState(false);
 
@@ -121,13 +105,6 @@ export default function ConfigurationScreen() {
         });
   
         const sysVersion = editorInterface.sys.version; // Ensure correct version
-  
-        // **Ensure entry editor is first**
-        // const existingEditors = editorInterface.editors || [];
-        // const updatedEditors = [
-        //   { widgetId: appId, widgetNamespace: "app" }, // Your app first
-        //   ...existingEditors.filter((editor) => editor.widgetId !== appId), // Keep others
-        // ];
 
         // **Ensure sidebar has defaults if undefined**
         const existingSidebar = editorInterface.sidebar !== undefined ? editorInterface.sidebar : DEFAULT_SIDEBAR;
@@ -173,8 +150,6 @@ export default function ConfigurationScreen() {
       targetState: currentState,
     };
   }, [parameters, sdk]);
-  
-  
   
     useEffect(() => {
       sdk.app.onConfigure(() => onConfigure());
