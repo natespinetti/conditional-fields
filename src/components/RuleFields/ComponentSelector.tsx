@@ -20,6 +20,7 @@ interface ComponentSelectorProps {
       <label style={{ fontSize: "1rem", fontWeight: 700 }}>Component:</label>
       <select
         value={currentComponent || ""}
+        style={{ borderRadius: "6px", padding: ".25rem .5rem"}}
         onChange={(e) => {
           setSelectedComponent(e.target.value);
           setCurrentRule((prev: any) => ({

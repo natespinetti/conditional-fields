@@ -20,9 +20,10 @@ interface ConditionSelectorProps {
     setCurrentRule
   }) => (
     <Stack flexDirection="column" alignItems="start">
-      <label style={{ paddingTop: "1rem", fontSize: "1rem", fontWeight: 700 }}>Condition:</label>
+      <label style={{ paddingTop: ".5rem", fontSize: "1rem", fontWeight: 700 }}>Condition:</label>
       <select
         value={currentIsEqualTo}
+        style={{ borderRadius: "6px", padding: ".25rem .5rem"}}
         onChange={(e) =>
           setCurrentRule((prev: any) => ({
             ...prev,

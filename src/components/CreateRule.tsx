@@ -20,11 +20,11 @@ const CreateRule: React.FC<CreateRuleProps> = ({ isShown, setShown, currentRule,
                 subtitle={""}
                 onClose={() => setShown(false)}
             >
-                <Stack flexDirection="column" alignItems="start" style={{width: "100%", gap: ".5rem"}}>
-                <h2 style={{fontWeight: 700, fontSize: "1rem"}}>{currentRule && currentRule.component ? "Add Rule for " + currentRule.component.slice(0,1).toUpperCase() + currentRule.component.slice(1, currentRule.component.length) : "Add Rule"}</h2>
-                <p>{currentRule ? 
-                (currentRule.ifField && "If ") + currentRule.ifField + (currentRule.isEqualTo && " is " + currentRule.isEqualTo) + (currentRule.condition && " to " + currentRule.condition) + (currentRule.condition ? ", show " : "") + currentRule.affectedFields.map((af: { field: any; }) => af.field).join(", ") + (currentRule.affectedFields.length > 0 ? " fields" : "")
-                : ""}</p>
+                <Stack flexDirection="column" alignItems="start" style={{width: "100%", gap: ".5rem", minHeight: "48px"}}>
+                    <h2 style={{fontWeight: 700, fontSize: "1rem"}}>{currentRule && currentRule.component ? "Add Rule for " + currentRule.component.slice(0,1).toUpperCase() + currentRule.component.slice(1, currentRule.component.length) : "Add Rule"}</h2>
+                    <p>{currentRule ? 
+                    (currentRule.ifField && "If ") + currentRule.ifField + (currentRule.isEqualTo && " is " + currentRule.isEqualTo) + (currentRule.condition && " to " + currentRule.condition) + (currentRule.condition ? ", show " : "") + currentRule.affectedFields.map((af: { field: any; }) => af.field).join(", ") + (currentRule.affectedFields.length > 0 ? " fields" : "")
+                    : ""}</p>
                 </Stack>
             </Modal.Header>
 

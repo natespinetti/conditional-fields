@@ -21,7 +21,7 @@ interface AffectedFieldsSelectorProps {
   
     return (
       <Stack flexDirection="column" alignItems="start">
-        <label style={{ paddingTop: "1rem", fontSize: "1rem", fontWeight: 700 }}>Fields to show:</label>
+        <label style={{ paddingTop: ".5rem", fontSize: "1rem", fontWeight: 700 }}>Fields to show:</label>
         <Stack flexDirection="row" alignItems="start">
           {fields
             .filter((f: any) => f.id !== currentRule.ifField && f.id !== "internalTitle")

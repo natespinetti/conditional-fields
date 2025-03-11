@@ -20,41 +20,44 @@ interface ConditionInputProps {
   
     return (
       <Stack flexDirection="column" alignItems="start">
-        <label style={{ paddingTop: "1rem", fontSize: "1rem", fontWeight: 700 }}>
-          Condition:
+        <label style={{ paddingTop: ".5rem", fontSize: "1rem", fontWeight: 700 }}>
+          Value:
         </label>
   
         {selectedField.type === "Boolean" ? (
           <>
+          <div style={{ display: "flex", gap: "1rem" }}>
             <Radio
-              value="true"
-              onChange={() =>
-                setCurrentRule((prev: any) => ({
-                  ...prev,
-                  condition: "true",
-                }))
-              }
-              isChecked={currentRule.condition === "true"}
-            >
-              True
-            </Radio>
-            <Radio
-              value="false"
-              onChange={() =>
-                setCurrentRule((prev: any) => ({
-                  ...prev,
-                  condition: "false",
-                }))
-              }
-              isChecked={currentRule.condition === "false"}
-            >
-              False
-            </Radio>
+                value="true"
+                onChange={() =>
+                    setCurrentRule((prev: any) => ({
+                    ...prev,
+                    condition: "true",
+                    }))
+                }
+                isChecked={currentRule.condition === "true"}
+                >
+                True
+                </Radio>
+                <Radio
+                value="false"
+                onChange={() =>
+                    setCurrentRule((prev: any) => ({
+                    ...prev,
+                    condition: "false",
+                    }))
+                }
+                isChecked={currentRule.condition === "false"}
+                >
+                False
+                </Radio>
+            </div>
           </>
         ) : (
           <input
             type="text"
             value={currentRule.condition}
+            style={{ borderRadius: "6px", padding: ".25rem .5rem"}}
             onChange={(e) =>
               setCurrentRule((prev: any) => ({
                 ...prev,
