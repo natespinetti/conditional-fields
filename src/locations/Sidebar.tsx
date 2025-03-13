@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Paragraph } from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
@@ -6,7 +6,10 @@ import { Condition } from 'types';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
-  
+  useEffect(() => {
+      // This ensures our app has enough space to render
+      sdk.window.startAutoResizer();
+  });
   return (
     <>
       <Paragraph><strong>Rules for {sdk.contentType.name}</strong></Paragraph>

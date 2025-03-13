@@ -13,6 +13,11 @@ const Fields = () => {
   const [currentField, setCurrentField] = useState<EntryFieldAPI>();
 
   useEffect(() => {
+    // This ensures our app has enough space to render
+    sdk.window.startAutoResizer();
+  });
+
+  useEffect(() => {
       const entryFields = sdk.entry.fields;
       console.log(Object.values(entryFields).find((field) => field.id === sdk.field.id));
       setCurrentField(Object.values(entryFields).find((field) => field.id === sdk.field.id));
