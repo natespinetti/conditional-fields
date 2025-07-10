@@ -160,12 +160,22 @@ function renderField(field: any) {
         return <Field fields={field} />
       }
 
-      // String Array only
-      return (
-        <>
-          <Selector fields={field} />
-        </>
-      )
+      // Check if the field has predefined options (validations with 'in' property)
+      const hasPredefinedOptions = field.items?.validations?.[0]?.in && 
+                                  Array.isArray(field.items.validations[0].in) && 
+                                  field.items.validations[0].in.length > 0
+
+      if (hasPredefinedOptions) {
+        // Use Selector for fields with predefined options
+        return (
+          <>
+            <Selector fields={field} />
+          </>
+        )
+      } else {
+        // Use default Contentful List feature for custom item entry
+        return <Field fields={field} />
+      }
     default:
       return <Field fields={field} />
   }
