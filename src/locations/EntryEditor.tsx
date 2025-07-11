@@ -18,25 +18,35 @@ const Entry = () => {
   // Use refs to store the latest values without triggering re-renders
   const detachFunctions = useRef<(() => void)[]>([])
 
-  const evaluateCondition = useCallback((rule: Rule, fieldValue: string): boolean => {
+  const evaluateCondition = useCallback((rule: Rule, fieldValue: any): boolean => {
+    // Normalize fieldValue for comparison
+    let value = fieldValue;
+    if (Array.isArray(fieldValue) && fieldValue.length === 1) {
+      value = fieldValue[0];
+    }
+    if (value === undefined || value === null) value = "";
+
     switch (rule.isEqualTo) {
       case "equal":
-        return fieldValue === rule.condition
+        return value === rule.condition;
       case "not equal":
-        return fieldValue !== rule.condition
+        return value !== rule.condition;
       case "contains":
-        return fieldValue.includes(rule.condition)
+        return Array.isArray(fieldValue)
+          ? fieldValue.includes(rule.condition)
+          : (value + "").includes(rule.condition);
       case "not contains":
-        return !fieldValue.includes(rule.condition)
+        return Array.isArray(fieldValue)
+          ? !fieldValue.includes(rule.condition)
+          : !(value + "").includes(rule.condition);
       case "empty":
-        return fieldValue === "" || fieldValue === undefined || fieldValue === null
+        return value === "" || value === undefined || value === null;
       case "not empty":
-        return fieldValue !== "" && fieldValue !== undefined && fieldValue !== null
+        return value !== "" && value !== undefined && value !== null;
       default:
-        // If the condition is a string, treat it like "equal"
-        return fieldValue === rule.isEqualTo
+        return value === rule.isEqualTo;
     }
-  }, [])
+  }, []);
 
   // Aggregate rule evaluation for field visibility
   const evaluateAllRules = useCallback(() => {
@@ -46,6 +56,9 @@ const Entry = () => {
     rules.forEach((rule) => {
       const fieldValue = sdk.entry.fields[rule.ifField]?.getValue();
       const conditionMet = evaluateCondition(rule, fieldValue);
+      console.log(
+        `Rule for field ${rule.ifField}: value=${JSON.stringify(fieldValue)}, condition=${rule.isEqualTo} ${rule.condition}, met=${conditionMet}`
+      );
       rule.affectedFields.forEach((af) => {
         if (conditionMet && af.action === "show") {
           fieldsToShow.add(af.field);
