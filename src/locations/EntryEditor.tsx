@@ -12,40 +12,10 @@ const Entry = () => {
   const [fields, setFields] = useState<Record<string, any>>(() => {
     return Object.fromEntries(Object.entries(sdk.entry.fields).map(([key, value]) => [key, value]))
   })
-  const [hiddenFields, setHiddenFields] = useState<Record<string, any>>({})
-  const [fieldOrder, setFieldOrder] = useState<string[]>(Object.keys(sdk.entry.fields))
   const [rules, setRules] = useState<Rule[]>([])
+  const [visibleFields, setVisibleFields] = useState<string[]>(Object.keys(sdk.entry.fields));
 
   // Use refs to store the latest values without triggering re-renders
-  const hiddenFieldsRef = useRef(hiddenFields)
-  const fieldOrderRef = useRef(fieldOrder)
-  const fieldsRef = useRef(fields)
-
-  // Update refs when state changes
-  useEffect(() => {
-    hiddenFieldsRef.current = hiddenFields
-  }, [hiddenFields])
-
-  useEffect(() => {
-    fieldOrderRef.current = fieldOrder
-  }, [fieldOrder])
-
-  useEffect(() => {
-    fieldsRef.current = fields
-  }, [fields])
-
-  useEffect(() => {
-    const entryFields = sdk.entry.fields
-    setFields(entryFields)
-    console.log(sdk)
-  }, [sdk])
-
-  useEffect(() => {
-    if (sdk.parameters.installation.rules) {
-      setRules(sdk.parameters.installation.rules)
-    }
-  }, [sdk])
-
   const detachFunctions = useRef<(() => void)[]>([])
 
   const evaluateCondition = useCallback((rule: Rule, fieldValue: string): boolean => {
@@ -68,82 +38,83 @@ const Entry = () => {
     }
   }, [])
 
-  useEffect(() => {
-    // Clean up previous listeners
-    detachFunctions.current.forEach((detach) => detach())
-    detachFunctions.current = []
+  // Aggregate rule evaluation for field visibility
+  const evaluateAllRules = useCallback(() => {
+    const fieldsToShow = new Set<string>();
 
+    // For each rule, check if its condition is met
     rules.forEach((rule) => {
-      const watchField = sdk.entry.fields[rule.ifField]
-      if (!watchField) return
+      const fieldValue = sdk.entry.fields[rule.ifField]?.getValue();
+      const conditionMet = evaluateCondition(rule, fieldValue);
+      rule.affectedFields.forEach((af) => {
+        if (conditionMet && af.action === "show") {
+          fieldsToShow.add(af.field);
+        }
+      });
+    });
 
-      const detach = watchField.onValueChanged((value) => {
-        const val = value?.toString() || ""
-        const shouldApplyRule = evaluateCondition(rule, val)
-        const shouldShow = shouldApplyRule
+    // Always show fields not affected by any rule
+    Object.keys(sdk.entry.fields).forEach((fieldName) => {
+      const isAffected = rules.some((rule) =>
+        rule.affectedFields.some((af) => af.field === fieldName)
+      );
+      if (!isAffected) {
+        fieldsToShow.add(fieldName);
+      }
+    });
 
-        console.log(`Rule evaluation for ${rule.ifField}:`, shouldShow)
+    setVisibleFields(Array.from(fieldsToShow));
+  }, [rules, sdk.entry.fields, evaluateCondition]);
 
-        // Use functional updates to avoid stale closures
-        setFields((prevFields) => {
-          const currentHiddenFields = hiddenFieldsRef.current
-          const currentFieldOrder = fieldOrderRef.current
-          const newFields = { ...prevFields }
-          const newHiddenFields = { ...currentHiddenFields }
-          const newFieldOrder = [...currentFieldOrder]
+  useEffect(() => {
+    // Detach previous listeners
+    detachFunctions.current.forEach((detach) => detach());
+    detachFunctions.current = [];
 
-          rule.affectedFields.forEach((field) => {
-            if (field.action === "show") {
-              if (shouldShow) {
-                // Show the field
-                if (newHiddenFields[field.field]) {
-                  newFields[field.field] = newHiddenFields[field.field]
-                  delete newHiddenFields[field.field]
+    // Listen to all fields that are used in any rule
+    const fieldsToWatch = Array.from(
+      new Set(rules.map((rule) => rule.ifField))
+    );
 
-                  if (!newFieldOrder.includes(field.field)) {
-                    newFieldOrder.push(field.field)
-                  }
-                }
-              } else {
-                // Hide the field
-                if (!newHiddenFields[field.field] && newFields[field.field]) {
-                  newHiddenFields[field.field] = newFields[field.field]
-                  delete newFields[field.field]
-                }
-              }
-            }
-          })
+    fieldsToWatch.forEach((fieldId) => {
+      const field = sdk.entry.fields[fieldId];
+      if (!field) return;
+      const detach = field.onValueChanged(() => {
+        evaluateAllRules();
+      });
+      detachFunctions.current.push(detach);
+    });
 
-          // Update hidden fields and field order if they changed
-          if (JSON.stringify(newHiddenFields) !== JSON.stringify(currentHiddenFields)) {
-            setHiddenFields(newHiddenFields)
-          }
-
-          if (JSON.stringify(newFieldOrder) !== JSON.stringify(currentFieldOrder)) {
-            setFieldOrder(newFieldOrder)
-          }
-
-          // Filter fields based on current field order
-          return Object.fromEntries(newFieldOrder.filter((f) => newFields[f]).map((f) => [f, newFields[f]]))
-        })
-      })
-
-      detachFunctions.current.push(detach)
-    })
+    // Initial evaluation
+    evaluateAllRules();
 
     return () => {
-      detachFunctions.current.forEach((detach) => detach())
+      detachFunctions.current.forEach((detach) => detach());
+    };
+  }, [rules, sdk.entry.fields, evaluateAllRules]);
+
+  useEffect(() => {
+    const entryFields = sdk.entry.fields
+    setFields(entryFields)
+    console.log(sdk)
+  }, [sdk])
+
+  useEffect(() => {
+    if (sdk.parameters.installation.rules) {
+      setRules(sdk.parameters.installation.rules)
     }
-  }, [rules, evaluateCondition, sdk.entry.fields]) // Removed hiddenFields and fieldOrder from dependencies
+  }, [sdk])
 
   return (
     <>
       <div style={{ padding: "2rem 0 4rem" }}>
-        {Object.entries(fields).map(([fieldName, field]) => (
-          <div key={fieldName} className={`${fieldName}`}>
-            <FieldWrap fields={field}>{renderField(field)}</FieldWrap>
-          </div>
-        ))}
+        {Object.entries(fields)
+          .filter(([fieldName]) => visibleFields.includes(fieldName))
+          .map(([fieldName, field]) => (
+            <div key={fieldName} className={`${fieldName}`}>
+              <FieldWrap fields={field}>{renderField(field)}</FieldWrap>
+            </div>
+          ))}
       </div>
     </>
   )
