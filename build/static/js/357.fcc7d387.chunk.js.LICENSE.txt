@@ -1,22 +1,4 @@
 /*!
-  Copyright (c) 2015 Jed Watson.
-  Based on code that is Copyright 2013-2015, Facebook, Inc.
-  All rights reserved.
-*/
-
-/*!
- * Adapted from jQuery UI core
- *
- * http://jqueryui.com
- *
- * Copyright 2014 jQuery Foundation and other contributors
- * Released under the MIT license.
- * http://jquery.org/license
- *
- * http://api.jqueryui.com/category/ui-core/
- */
-
-/*!
  * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
  *
  * Copyright (c) 2014-2017, Jon Schlinkert.
@@ -95,8 +77,6 @@
 
 /*! ../helpers/resolveConfig.js */
 
-/*! ../helpers/speedometer.js */
-
 /*! ../helpers/toFormData.js */
 
 /*! ../helpers/toURLEncodedForm.js */
@@ -118,12 +98,6 @@
 /*! ../utils.js */
 
 /*! ./../core/settle.js */
-
-/*! ./../helpers/buildURL.js */
-
-/*! ./../helpers/cookies.js */
-
-/*! ./../helpers/isURLSameOrigin.js */
 
 /*! ./../utils.js */
 
@@ -508,10 +482,6 @@
 /*! has-symbols */
 
 /*! hasown */
-
-/*! lodash.isplainobject */
-
-/*! lodash.isstring */
 
 /*! lodash/isPlainObject.js */
 
@@ -1202,10 +1172,6 @@
         \************************************************/
 
 /*!************************************************!*\
-        !*** ../node_modules/lodash.isstring/index.js ***!
-        \************************************************/
-
-/*!************************************************!*\
         !*** ../node_modules/math-intrinsics/floor.js ***!
         \************************************************/
 
@@ -1347,10 +1313,6 @@
 
 /*!*****************************************************!*\
         !*** ../node_modules/axios/lib/helpers/throttle.js ***!
-        \*****************************************************/
-
-/*!*****************************************************!*\
-        !*** ../node_modules/lodash.isplainobject/index.js ***!
         \*****************************************************/
 
 /*!*****************************************************!*\
@@ -1641,10 +1603,6 @@
         !*** ../node_modules/contentful-sdk-core/dist/enforce-obj-path.js ***!
         \********************************************************************/
 
-/*!********************************************************************!*\
-        !*** ../node_modules/contentful-sdk-core/dist/index.es-modules.js ***!
-        \********************************************************************/
-
 /*!**********************************************************************!*\
         !*** ../node_modules/axios/lib/platform/browser/classes/FormData.js ***!
         \**********************************************************************/
@@ -1673,10 +1631,6 @@
         !*** ../node_modules/axios/lib/platform/browser/classes/URLSearchParams.js ***!
         \*****************************************************************************/
 
-/*!************************************************************************************!*\
-        !*** ../node_modules/contentful-sdk-core/node_modules/fast-copy/dist/fast-copy.js ***!
-        \************************************************************************************/
-
 /**
  * @license
  * Lodash <https://lodash.com/>
@@ -1684,46 +1638,6 @@
  * Released under MIT license <https://lodash.com/license>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
  * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- */
-
-/**
- * @license React
- * react-dom.production.min.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-/**
- * @license React
- * react-jsx-runtime.production.min.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-/**
- * @license React
- * react.production.min.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-/**
- * @license React
- * scheduler.production.min.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
  */
 
 /**

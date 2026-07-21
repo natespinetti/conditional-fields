@@ -96,6 +96,42 @@ checkBrowsers(paths.appPath, isInteractive)
       );
       console.log();
 
+      // Contentful App Hosting rejects bundles over 10 MB / 500 files.
+      // https://www.contentful.com/developers/docs/extensibility/app-framework/app-bundle/
+      const CONTENTFUL_MAX_BUNDLE_BYTES = 10 * 1024 * 1024;
+      const CONTENTFUL_MAX_FILES = 500;
+      const buildFiles = [];
+      const walk = dir => {
+        fs.readdirSync(dir).forEach(name => {
+          const filePath = path.join(dir, name);
+          if (fs.statSync(filePath).isDirectory()) walk(filePath);
+          else buildFiles.push(filePath);
+        });
+      };
+      walk(paths.appBuild);
+      const totalBytes = buildFiles.reduce(
+        (sum, filePath) => sum + fs.statSync(filePath).size,
+        0
+      );
+      const totalMb = (totalBytes / (1024 * 1024)).toFixed(2);
+      if (
+        totalBytes > CONTENTFUL_MAX_BUNDLE_BYTES ||
+        buildFiles.length > CONTENTFUL_MAX_FILES
+      ) {
+        console.log(
+          chalk.red(
+            `Contentful upload limit exceeded: ${totalMb} MB / ${buildFiles.length} files ` +
+              `(max 10 MB / 500 files).\n`
+          )
+        );
+        process.exit(1);
+      }
+      console.log(
+        chalk.green(
+          `Contentful bundle size OK: ${totalMb} MB / ${buildFiles.length} files (limit 10 MB / 500).\n`
+        )
+      );
+
       const appPackage = require(paths.appPackageJson);
       const publicUrl = paths.publicUrlOrPath;
       const publicPath = config.output.publicPath;

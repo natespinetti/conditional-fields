@@ -1,0 +1,1 @@
+"use strict";(this.webpackChunkconditional_fields=this.webpackChunkconditional_fields||[]).push([[999],{39999:(e,s,i)=>{i.r(s),i.d(s,{default:()=>c});var n=i(9950),t=i(1138),a=i(8576),o=i(44414);const c=()=>{const e=(0,a.useSDK)();return(0,n.useEffect)((()=>{e.navigator.openAppConfig()}),[e]),(0,o.jsx)(t.y,{size:"large"})}}}]);
